@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         director.setScreenSize(480, 320);
 
         CCScene ccScene = CCScene.node();
-        ccScene.addChild(new ActionLayer());
+        ccScene.addChild(new DemoLayer());
         director.runWithScene(ccScene);
 
     }
