@@ -22,6 +22,8 @@ import org.cocos2d.particlesystem.CCParticleSnow;
 import org.cocos2d.particlesystem.CCParticleSystem;
 import org.cocos2d.sound.SoundEngine;
 import org.cocos2d.types.CGPoint;
+import org.cocos2d.types.CGRect;
+import org.cocos2d.types.CGSize;
 import org.cocos2d.types.util.CGPointUtil;
 
 import java.util.ArrayList;
@@ -60,7 +62,7 @@ public class DemoLayer extends CCLayer {
      */
     private void loadParticle() {
         system = CCParticleSnow.node();
-        system.setTexture(CCTextureCache.sharedTextureCache().addImage("f.png"));
+        system.setTexture(CCTextureCache.sharedTextureCache().addImage("snow.png"));
         this.addChild(system, 1);
     }
 
@@ -116,6 +118,7 @@ public class DemoLayer extends CCLayer {
 
             dance();
             SoundEngine engine = SoundEngine.sharedEngine();
+            //参数1  上下文  参数2 音乐资源的ID， 参数3  是否循环播放
             engine.playSound(CCDirector.theApp, R.raw.psy, true);
         }
     }
@@ -161,12 +164,40 @@ public class DemoLayer extends CCLayer {
         for (HashMap<String, String> hashMap : objects){
             int x = Integer.parseInt(hashMap.get("x"));
             int y = Integer.parseInt(hashMap.get("y"));
-
             CGPoint cgPoint = ccp(x, y);
             roadPoints.add(cgPoint);
         }
 
     }
 
+    @Override
+    public boolean ccTouchesBegan(MotionEvent event) {
+        this.onExit();
+        //场景添加新的图层
+        this.getParent().addChild(new PauseLayer());
 
+        return super.ccTouchesBegan(event);
+    }
+
+    class PauseLayer extends CCLayer{
+        private CCSprite heart;
+        public PauseLayer() {
+            this.setIsTouchEnabled(true);//打开触摸事件的开关
+            heart = CCSprite.sprite("start.png");
+            CGSize winSize = CCDirector.sharedDirector().getWinSize();
+            heart.setPosition(winSize.getWidth() / 2, winSize.getHeight() / 2);
+            this.addChild(heart);
+        }
+
+        @Override
+        public boolean ccTouchesBegan(MotionEvent event) {
+            CGRect boundingBox = heart.getBoundingBox();
+            CGPoint convertTouch = this.convertTouchToNodeSpace(event);
+            if (CGRect.containsPoint(boundingBox, convertTouch)){
+                this.removeSelf();
+                DemoLayer.this.onEnter();
+            }
+            return super.ccTouchesBegan(event);
+        }
+    }
 }
